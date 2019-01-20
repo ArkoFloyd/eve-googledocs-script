@@ -35,24 +35,25 @@ function getSetup() {
  return config;
 }
 
-function getAccessToken(config) {
-  
-  if (Date.now()>config.expires) {
+  return config; 
+}
 
-  var url = 'https://login.eveonline.com/oauth/token?'
-    + 'grant_type=refresh_token'
-    + '&refresh_token='+config.refreshtoken;
-  
-  var code=Utilities.base64Encode(config.clientid+':'+config.secret);
-  
+function getAccessToken(config) {
+  if (Date.now()>config.expires) {
+   
+//---------------------------- Changed    
+  var url = 'https://login.eveonline.com/v2/oauth/token';
   var headers = {
-    'Authorization': 'Basic '+code,
-    'Content-Type': 'application/x-www-form-urlencoded',
-    };
+    'Content-Type': 'application/json',
+    'Authorization': 'Basic '+Utilities.base64EncodeWebSafe(config.clientid+':'+config.secret),   
+  };
   var parameters = {
-    'method': 'post',
+    'method': 'POST',
     'headers': headers,
+    'payload': JSON.stringify({grant_type:'refresh_token',refresh_token: config.refreshtoken}),
     };
+//---------------------------- 
+   
   var response = UrlFetchApp.fetch(url, parameters).getContentText();
   var json = JSON.parse(response);
   var access_token = json['access_token'];
